@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Registration</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>User Registration</h2>
+
+    <form id="registerForm">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="Enter username">
+
+        <label>Email</label>
+        <input type="email" id="email" placeholder="Enter email">
+
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Enter password">
+
+        <label>Confirm Password</label>
+        <input type="password" id="confirmPassword" placeholder="Confirm password">
+		<label>Course</label>
+<select id="course">
+    <option value="">Select Course</option>
+    <option value="Web Development">Web Development</option>
+    <option value="Python">Python</option>
+    <option value="C++">C++</option>
+	<option value="Data Science">Data Science</option>
+	<option value="PERL">PERL</option>
+</select>
+
+
+        <button type="submit">Register</button>
+
+        <p id="message"></p>
+    </form>
+</div>
+<!-- Applied Users List -->
+<div class="list-container">
+    <h3>Applied Students</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Course</th>
+				<th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="userList">
+            <!-- Data will come here -->
+        </tbody>
+    </table>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>let editRow = null;
+
+document.getElementById("registerForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    let username = document.getElementById("username").value.trim();
+    let email = document.getElementById("email").value.trim();
+    let course = document.getElementById("course").value.trim();
+    let password = document.getElementById("password").value;
+    let confirmPassword = document.getElementById("confirmPassword").value;
+    let message = document.getElementById("message");
+
+    // Check empty fields
+    if (username === "" || email === "" || course === "" || password === "" || confirmPassword === "") {
+        message.style.color = "red";
+        message.innerText = "Please fill all fields!";
+        return;
+    }
+
+    // Username validation (only letters, min 3 chars)
+    let usernameRegex = /^[A-Za-z]{3,}$/;
+    if (!usernameRegex.test(username)) {
+        message.style.color = "red";
+        message.innerText = "Username must be at least 3 letters and contain only alphabets!";
+        return;
+    }
+
+    // Email validation
+    let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        message.style.color = "red";
+        message.innerText = "Please enter a valid email address!";
+        return;
+    }
+
+    // Password validation (min 6 chars, 1 number, 1 uppercase)
+    let passwordRegex = /^(?=.*[A-Z])(?=.*\d).{6,}$/;
+    if (!passwordRegex.test(password)) {
+        message.style.color = "red";
+        message.innerText = "Password must be at least 6 characters, include 1 uppercase letter and 1 number!";
+        return;
+    }
+
+    // Password match
+    if (password !== confirmPassword) {
+        message.style.color = "red";
+        message.innerText = "Passwords do not match!";
+        return;
+    }
+
+    if (editRow === null) {
+        // ADD NEW ROW
+        let tableBody = document.getElementById("userList");
+        let row = tableBody.insertRow();
+
+        row.insertCell(0).innerText = username;
+        row.insertCell(1).innerText = email;
+        row.insertCell(2).innerText = course;
+
+        let actionCell = row.insertCell(3);
+        actionCell.innerHTML = `
+            <button onclick="editUser(this)">Edit</button>
+            <button onclick="deleteUser(this)">Delete</button>
+        `;
+
+        message.style.color = "green";
+        message.innerText = "Course Applied Successfully!";
+    } else {
+        // UPDATE EXISTING ROW
+        editRow.cells[0].innerText = username;
+        editRow.cells[1].innerText = email;
+        editRow.cells[2].innerText = course;
+
+        editRow = null;
+        message.style.color = "green";
+        message.innerText = "Details Updated Successfully!";
+    }
+
+    document.getElementById("registerForm").reset();
+});
+
+// EDIT FUNCTION
+function editUser(btn) {
+    editRow = btn.parentElement.parentElement;
+
+    document.getElementById("username").value = editRow.cells[0].innerText;
+    document.getElementById("email").value = editRow.cells[1].innerText;
+    document.getElementById("course").value = editRow.cells[2].innerText;
+
+    document.getElementById("message").style.color = "blue";
+    document.getElementById("message").innerText = "Edit the details and click Register to update";
+}
+
+// DELETE FUNCTION with POPUP
+function deleteUser(btn) {
+    let confirmDelete = confirm("Are you sure you want to delete this record?");
+    if (confirmDelete) {
+        let row = btn.parentElement.parentElement;
+        row.remove();
+    }
+}
+
